@@ -63,7 +63,7 @@ def test_whitespace_inside():
 
 def test_arabic_numbers():
     with pytest.raises(ValueError):
-        parse_money("١٢.٥")
+        parse_money("\u0661\u0662.\u0665")
 
 
 def test_minus_inside():
@@ -103,15 +103,40 @@ def test_leading_dot():
     assert str(parse_money(".5")) == "0.50"
 
 
+def test_leading_dot_with_minus():
+    assert str(parse_money("-.5")) == "-0.50"
+
+
 def test_trailing_dot():
     assert str(parse_money("5.")) == "5.00"
 
 
-def test_lone_dot_rejected():
+def test_too_many_integer_digits():
     with pytest.raises(ValueError):
-        parse_money(".")
+        parse_money("1" * 30)
 
 
-def test_lone_minus_dot_rejected():
+def test_16_integer_digits_accepted():
+    assert str(parse_money("1" * 16)) == "1" * 16 + ".00"
+
+
+def test_17_integer_digits_rejected():
     with pytest.raises(ValueError):
-        parse_money("-.")
+        parse_money("1" * 17)
+
+
+def test_16_integer_digits_with_minus_accepted():
+    assert str(parse_money("-" + "1" * 16)) == "-" + "1" * 16 + ".00"
+
+
+def test_16_integer_digits_with_fraction_accepted():
+    assert str(parse_money("1" * 16 + ".5")) == "1" * 16 + ".50"
+
+
+def test_surrounding_whitespace_not_counted():
+    assert str(parse_money(" " * 60 + "12.5")) == "12.50"
+
+
+def test_length_over_limit_rejected():
+    with pytest.raises(ValueError, match="too long"):
+        parse_money("0" * 65)
