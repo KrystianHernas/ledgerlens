@@ -1,12 +1,16 @@
 from decimal import Decimal
 
 
+def _is_ascii_digit(ch: str) -> bool:
+    return "0" <= ch <= "9"
+
+
 def parse_money(a: str) -> Decimal:
     if not isinstance(a, str):
         raise TypeError("Input is not a string")
 
     a = a.strip()
-    if len(a) > 64:
+    if len(a) > 20:
         raise ValueError(f"input too long: {len(a)} characters")
     s = a.split(".")
 
@@ -20,15 +24,16 @@ def parse_money(a: str) -> Decimal:
         if seen_char and ch == "-":
             raise ValueError("Minus in invalid place")
 
-        # reguła dozwolonych znaków
-        if ch != "." and ch != "-" and not ("0" <= ch <= "9"):
+        # allowed characters only
+        if ch != "." and ch != "-" and not _is_ascii_digit(ch):
             raise ValueError(f"invalid money format: {a!r}")
 
         seen_char = True
 
-    if not any("0" <= ch <= "9" for ch in a):
+    if not any(_is_ascii_digit(ch) for ch in a):
         raise ValueError("Input does not contain digit")
 
+    # Leading zeros count toward the 16-digit limit (decision B).
     integer_part = s[0].lstrip("-")
 
     if len(integer_part) > 16:
