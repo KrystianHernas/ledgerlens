@@ -111,11 +111,6 @@ def test_trailing_dot():
     assert str(parse_money("5.")) == "5.00"
 
 
-def test_too_many_integer_digits():
-    with pytest.raises(ValueError):
-        parse_money("1" * 30)
-
-
 def test_16_integer_digits_accepted():
     assert str(parse_money("1" * 16)) == "1" * 16 + ".00"
 
@@ -133,10 +128,29 @@ def test_16_integer_digits_with_fraction_accepted():
     assert str(parse_money("1" * 16 + ".5")) == "1" * 16 + ".50"
 
 
+def test_max_length_accepted():
+    assert str(parse_money("-" + "1" * 16 + ".99")) == "-1111111111111111.99"
+
+
 def test_surrounding_whitespace_not_counted():
     assert str(parse_money(" " * 60 + "12.5")) == "12.50"
 
 
 def test_length_over_limit_rejected():
     with pytest.raises(ValueError, match="too long"):
-        parse_money("0" * 65)
+        parse_money("0" * 21)
+
+
+def test_20_chars_of_zeros_rejected_by_digit_limit():
+    with pytest.raises(ValueError):
+        parse_money("0" * 20)
+
+
+def test_too_many_leading_zeros():
+    with pytest.raises(ValueError, match="Number is too big"):
+        parse_money("0" * 16 + "1")
+
+
+def test_20_chars_with_19_digits_rejected():
+    with pytest.raises(ValueError):
+        parse_money("-" + "1" * 19)
