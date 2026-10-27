@@ -1,4 +1,7 @@
+from dataclasses import dataclass
 from decimal import Decimal
+
+from ledgerlens.domain.currency import CurrencyRegistry
 
 
 def _is_ascii_digit(ch: str) -> bool:
@@ -43,3 +46,22 @@ def parse_money(a: str) -> Decimal:
     if q.is_zero():
         return abs(q)
     return q
+
+
+@dataclass(frozen=True, slots=True)
+class Money:
+    amount: Decimal
+    currency: str
+
+    def __init__(self, amount: Decimal | str, currency: str) -> None:
+        registry = CurrencyRegistry()
+        cur = currency.upper()
+        registry.decimals(cur)  # validates
+        if isinstance(amount, str):
+            amt = parse_money(amount)
+        elif isinstance(amount, Decimal):
+            amt = amount
+        else:
+            raise TypeError("amount must be Decimal or str")
+        object.__setattr__(self, "amount", amt)
+        object.__setattr__(self, "currency", cur)
