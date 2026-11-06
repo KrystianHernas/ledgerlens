@@ -6,24 +6,27 @@ from ledgerlens.domain.money import parse_money
 
 
 def test_zero():
-    assert str(parse_money("0.00")) == str(Decimal("0.00"))
+    assert parse_money("0.00") == Decimal("0.00")
 
 
 def test_negative():
-    assert str(parse_money("-0.01")) == str(Decimal("-0.01"))
+    assert parse_money("-0.01") == Decimal("-0.01")
 
 
 def test_one_precision():
-    assert str(parse_money("12.5")) == str(Decimal("12.50"))
+    assert parse_money("12.5") == Decimal("12.5")
 
 
 def test_whitespace():
-    assert str(parse_money(" 12.5 ")) == "12.50"
+    assert parse_money(" 12.5 ") == Decimal("12.5")
 
 
 def test_three_precision():
-    with pytest.raises(ValueError):
-        parse_money("0.001")
+    assert parse_money("0.001") == Decimal("0.001")
+
+
+def test_four_decimal_places():
+    assert parse_money("10.1234") == Decimal("10.1234")
 
 
 def test_e_precision():
@@ -92,27 +95,27 @@ def test_dot_minus():
 
 
 def test_negative_zero():
-    assert str(parse_money("-0.00")) == "0.00"
+    assert parse_money("-0.00") == Decimal("-0.00")
 
 
 def test_negative_zero_integer():
-    assert str(parse_money("-0")) == "0.00"
+    assert parse_money("-0") == Decimal(0)
 
 
 def test_leading_dot():
-    assert str(parse_money(".5")) == "0.50"
+    assert parse_money(".5") == Decimal("0.5")
 
 
 def test_leading_dot_with_minus():
-    assert str(parse_money("-.5")) == "-0.50"
+    assert parse_money("-.5") == Decimal("-0.5")
 
 
 def test_trailing_dot():
-    assert str(parse_money("5.")) == "5.00"
+    assert parse_money("5.") == Decimal(5)
 
 
 def test_16_integer_digits_accepted():
-    assert str(parse_money("1" * 16)) == "1" * 16 + ".00"
+    assert parse_money("1" * 16) == Decimal("1" * 16)
 
 
 def test_17_integer_digits_rejected():
@@ -121,19 +124,19 @@ def test_17_integer_digits_rejected():
 
 
 def test_16_integer_digits_with_minus_accepted():
-    assert str(parse_money("-" + "1" * 16)) == "-" + "1" * 16 + ".00"
+    assert parse_money("-" + "1" * 16) == Decimal("-" + "1" * 16)
 
 
 def test_16_integer_digits_with_fraction_accepted():
-    assert str(parse_money("1" * 16 + ".5")) == "1" * 16 + ".50"
+    assert parse_money("1" * 16 + ".5") == Decimal("1" * 16 + ".5")
 
 
 def test_max_length_accepted():
-    assert str(parse_money("-" + "1" * 16 + ".99")) == "-1111111111111111.99"
+    assert parse_money("-" + "1" * 16 + ".99") == Decimal("-1111111111111111.99")
 
 
 def test_surrounding_whitespace_not_counted():
-    assert str(parse_money(" " * 60 + "12.5")) == "12.50"
+    assert parse_money(" " * 60 + "12.5") == Decimal("12.5")
 
 
 def test_length_over_limit_rejected():
