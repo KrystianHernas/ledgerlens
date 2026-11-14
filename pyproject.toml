@@ -1,7 +1,7 @@
 [project]
 name = "ledgerlens"
 version = "0.1.0"
-description = "Add your description here"
+description = "Backend library for handling monetary amounts and currencies."
 readme = "README.md"
 authors = [
     { name = "KrystianHernas", email = "krystian.hernas@gmail.com" }
